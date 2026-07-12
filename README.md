@@ -73,6 +73,7 @@ The seed data already contains every state (an active dispatched trip, an expire
 - **Fuel & Expenses** — fuel logs and other expenses per vehicle, with automatic operational-cost rollups (Fuel + Maintenance).
 - **Reports & Analytics** — fuel efficiency (km/L), fleet utilization, operational cost and vehicle ROI `((Revenue − (Maintenance + Fuel)) / Acquisition Cost)`, CSV export, and cost/efficiency charts.
 - **Spreadsheet Import** — the migration path for teams still on Excel: upload an existing vehicle/driver logbook as CSV; every row passes through the same validation and duplicate rules as the forms, with a per-row created/skipped report. Sample files included.
+- **Ops Sheet Bridge** — two-way Google Sheets sync for teams that won't leave their sheet. One click pulls sheet edits into the app *through the same validation and business rules as the forms* (a new sheet row becomes a validated vehicle, duplicates are skipped with a reason), then pushes the authoritative fleet state back, stamping IDs onto new rows. Pull-then-push in a single pass means no echo loops; Odometer and Status stay app-owned. Config is optional and env-based (`GOOGLE_OAUTH_CLIENT_PATH`, `GOOGLE_SHEETS_TOKEN_PATH`, `SYNC_SPREADSHEET_ID` in `.env.local` — an OAuth client + token JSON with the `spreadsheets` scope); without it the rest of the app is fully functional and the `/sync` page explains the feature.
 
 ## Notes
 

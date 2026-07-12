@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/expenses", label: "Fuel & Expenses" },
   { href: "/reports", label: "Reports" },
   { href: "/import", label: "Import" },
+  { href: "/sync", label: "Sheet Bridge" },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: React.ReactNode }) {
