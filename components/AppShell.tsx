@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/maintenance", label: "Maintenance" },
   { href: "/expenses", label: "Fuel & Expenses" },
   { href: "/reports", label: "Reports" },
+  { href: "/import", label: "Import" },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: React.ReactNode }) {

@@ -6,7 +6,7 @@ import { titleCase } from "@/lib/domain";
 import { formatDate, formatINR, formatNumber } from "@/lib/format";
 import { ControlPanel, EmptyRow, FormSheet, ListView, SecondaryButton, StatusBadge, Td, Th } from "@/components/ui";
 import { VehicleForm } from "@/components/VehicleForm";
-import { setVehicleRetiredAction, updateVehicleAction } from "../actions";
+import { setVehicleRetiredFormAction, updateVehicleAction } from "../actions";
 
 export default async function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
@@ -15,8 +15,8 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
   if (!vehicle) notFound();
 
   const updateWithId = updateVehicleAction.bind(null, vehicle.id);
-  const retire = setVehicleRetiredAction.bind(null, vehicle.id, true);
-  const reactivate = setVehicleRetiredAction.bind(null, vehicle.id, false);
+  const retire = setVehicleRetiredFormAction.bind(null, vehicle.id, true);
+  const reactivate = setVehicleRetiredFormAction.bind(null, vehicle.id, false);
 
   return (
     <>

@@ -50,3 +50,8 @@ export async function setVehicleRetiredAction(id: string, retired: boolean): Pro
   });
   return result;
 }
+
+/** Form-compatible wrapper (forms expect a void action). */
+export async function setVehicleRetiredFormAction(id: string, retired: boolean): Promise<void> {
+  await setVehicleRetiredAction(id, retired);
+}

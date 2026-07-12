@@ -15,9 +15,13 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
   if (!driver) notFound();
 
   const updateWithId = updateDriverAction.bind(null, driver.id);
-  const setAvailable = setDriverStatusAction.bind(null, driver.id, "AVAILABLE");
-  const setOffDuty = setDriverStatusAction.bind(null, driver.id, "OFF_DUTY");
-  const setSuspended = setDriverStatusAction.bind(null, driver.id, "SUSPENDED");
+  // Bound status actions take no FormData — cast to the <form action> shape
+  // React expects (mirrors the same pattern/limitation as setVehicleRetiredAction
+  // in the vehicles exemplar).
+  type FormAction = (formData: FormData) => void | Promise<void>;
+  const setAvailable = setDriverStatusAction.bind(null, driver.id, "AVAILABLE") as unknown as FormAction;
+  const setOffDuty = setDriverStatusAction.bind(null, driver.id, "OFF_DUTY") as unknown as FormAction;
+  const setSuspended = setDriverStatusAction.bind(null, driver.id, "SUSPENDED") as unknown as FormAction;
 
   return (
     <>
