@@ -25,6 +25,16 @@ No database server, no environment variables — the app runs on a local SQLite 
 
 Role-based access control: every mutation is guarded server-side (see `lib/session.ts` → `assertRole`); the Fleet Manager has cross-module oversight.
 
+## Screenshots
+
+| Dashboard | Trip pipeline |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Trip lifecycle](docs/screenshots/trip-pipeline.png) |
+
+| Reports & analytics | Ops Sheet Bridge |
+|---|---|
+| ![Reports](docs/screenshots/reports.png) | ![Sheet Bridge](docs/screenshots/sheet-bridge.png) |
+
 ## Stack
 
 - **Next.js (App Router) + TypeScript** — server components + server actions, no client-side API juggling

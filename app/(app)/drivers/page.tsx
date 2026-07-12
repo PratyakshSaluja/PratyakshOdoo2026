@@ -1,9 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { listDrivers } from "@/lib/services/driverService";
 import { requireUser } from "@/lib/session";
 import { DRIVER_STATUSES, titleCase } from "@/lib/domain";
 import { formatDate, isLicenseExpired, daysUntil } from "@/lib/format";
-import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass } from "@/components/ui";
+import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 
 export default async function DriversPage({
   searchParams,
@@ -25,9 +25,9 @@ export default async function DriversPage({
               name="q"
               defaultValue={filters.q}
               placeholder="Search name / license no."
-              className={`${inputClass} w-48`}
+              className={`${filterInputClass} w-48`}
             />
-            <select name="status" defaultValue={filters.status ?? ""} className={`${inputClass} w-32`}>
+            <select name="status" defaultValue={filters.status ?? ""} className={`${filterInputClass} w-32`}>
               <option value="">All statuses</option>
               {DRIVER_STATUSES.map((s) => (
                 <option key={s} value={s}>

@@ -3,7 +3,7 @@ import { listMaintenance } from "@/lib/services/maintenanceService";
 import { requireUser } from "@/lib/session";
 import { titleCase } from "@/lib/domain";
 import { formatDate, formatINR } from "@/lib/format";
-import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass } from "@/components/ui";
+import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 import { closeMaintenanceAction } from "./actions";
 import { CloseForm } from "./CloseForm";
 
@@ -25,7 +25,7 @@ export default async function MaintenancePage({
         actions={<PrimaryLink href="/maintenance/new">New</PrimaryLink>}
         right={
           <form className="flex items-center gap-2" method="get">
-            <select name="status" defaultValue={filters.status ?? ""} className={`${inputClass} w-32`}>
+            <select name="status" defaultValue={filters.status ?? ""} className={`${filterInputClass} w-32`}>
               <option value="">All statuses</option>
               {MAINTENANCE_STATUSES.map((s) => (
                 <option key={s} value={s}>

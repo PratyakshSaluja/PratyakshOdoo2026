@@ -1,9 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { listVehicles } from "@/lib/services/vehicleService";
 import { requireUser } from "@/lib/session";
 import { REGIONS, VEHICLE_STATUSES, VEHICLE_TYPES, titleCase } from "@/lib/domain";
 import { formatINR, formatNumber } from "@/lib/format";
-import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass } from "@/components/ui";
+import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 
 export default async function VehiclesPage({
   searchParams,
@@ -25,9 +25,9 @@ export default async function VehiclesPage({
               name="q"
               defaultValue={filters.q}
               placeholder="Search reg no. / name"
-              className={`${inputClass} w-44`}
+              className={`${filterInputClass} w-44`}
             />
-            <select name="type" defaultValue={filters.type ?? ""} className={`${inputClass} w-28`}>
+            <select name="type" defaultValue={filters.type ?? ""} className={`${filterInputClass} w-28`}>
               <option value="">All types</option>
               {VEHICLE_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -35,7 +35,7 @@ export default async function VehiclesPage({
                 </option>
               ))}
             </select>
-            <select name="status" defaultValue={filters.status ?? ""} className={`${inputClass} w-32`}>
+            <select name="status" defaultValue={filters.status ?? ""} className={`${filterInputClass} w-32`}>
               <option value="">All statuses</option>
               {VEHICLE_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -43,7 +43,7 @@ export default async function VehiclesPage({
                 </option>
               ))}
             </select>
-            <select name="region" defaultValue={filters.region ?? ""} className={`${inputClass} w-28`}>
+            <select name="region" defaultValue={filters.region ?? ""} className={`${filterInputClass} w-28`}>
               <option value="">All regions</option>
               {REGIONS.map((r) => (
                 <option key={r} value={r}>

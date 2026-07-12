@@ -5,7 +5,7 @@ import { listTrips } from "@/lib/services/tripService";
 import { listDrivers } from "@/lib/services/driverService";
 import { REGIONS, VEHICLE_STATUSES, VEHICLE_TYPES, titleCase } from "@/lib/domain";
 import { daysUntil, formatDate, formatDateTime, formatNumber } from "@/lib/format";
-import { ControlPanel, EmptyRow, KpiCard, ListView, StatusBadge, Td, Th, inputClass } from "@/components/ui";
+import { ControlPanel, EmptyRow, KpiCard, ListView, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 
 export default async function DashboardPage({
   searchParams,
@@ -32,7 +32,7 @@ export default async function DashboardPage({
         title="Dashboard"
         right={
           <form className="flex flex-wrap items-center gap-2" method="get">
-            <select name="type" defaultValue={filters.type ?? ""} className={`${inputClass} w-28`}>
+            <select name="type" defaultValue={filters.type ?? ""} className={`${filterInputClass} w-28`}>
               <option value="">All types</option>
               {VEHICLE_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -40,7 +40,7 @@ export default async function DashboardPage({
                 </option>
               ))}
             </select>
-            <select name="status" defaultValue={filters.status ?? ""} className={`${inputClass} w-32`}>
+            <select name="status" defaultValue={filters.status ?? ""} className={`${filterInputClass} w-32`}>
               <option value="">All statuses</option>
               {VEHICLE_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -48,7 +48,7 @@ export default async function DashboardPage({
                 </option>
               ))}
             </select>
-            <select name="region" defaultValue={filters.region ?? ""} className={`${inputClass} w-28`}>
+            <select name="region" defaultValue={filters.region ?? ""} className={`${filterInputClass} w-28`}>
               <option value="">All regions</option>
               {REGIONS.map((r) => (
                 <option key={r} value={r}>

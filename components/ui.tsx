@@ -166,8 +166,13 @@ export function Field({ label, children }: { label: string; children: React.Reac
   );
 }
 
-export const inputClass =
-  "w-full rounded border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-800 focus:border-odoo focus:outline-none focus:ring-1 focus:ring-odoo";
+const inputBase =
+  "rounded border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-800 focus:border-odoo focus:outline-none focus:ring-1 focus:ring-odoo";
+
+export const inputClass = `w-full ${inputBase}`;
+
+/** For inline filter bars — no w-full so explicit widths apply. */
+export const filterInputClass = inputBase;
 
 export function ErrorBanner({ message }: { message?: string }) {
   if (!message) return null;

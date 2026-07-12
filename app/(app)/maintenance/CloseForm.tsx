@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import type { ActionResult } from "@/lib/errors";
-import { ErrorBanner, inputClass } from "@/components/ui";
+import { ErrorBanner, inputClass, filterInputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 
 export function CloseForm({
@@ -21,7 +21,7 @@ export function CloseForm({
           step="any"
           min="0"
           placeholder="Final cost ₹"
-          className={`${inputClass} w-28`}
+          className={`${filterInputClass} w-28`}
         />
         <SubmitButton variant="secondary">Close & Restore</SubmitButton>
       </form>

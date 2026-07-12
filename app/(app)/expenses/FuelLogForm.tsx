@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import type { ActionResult } from "@/lib/errors";
-import { ErrorBanner, inputClass } from "@/components/ui";
+import { ErrorBanner, inputClass, filterInputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 
 type VehicleOption = { id: string; label: string };
@@ -22,7 +22,7 @@ export function FuelLogForm({
       <div className="flex flex-wrap items-end gap-2">
         <label className="block">
           <span className="mb-1 block text-[13px] font-medium text-gray-600">Vehicle *</span>
-          <select name="vehicleId" required defaultValue="" className={`${inputClass} w-56`}>
+          <select name="vehicleId" required defaultValue="" className={`${filterInputClass} w-56`}>
             <option value="" disabled>
               Select a vehicle
             </option>
@@ -35,15 +35,15 @@ export function FuelLogForm({
         </label>
         <label className="block">
           <span className="mb-1 block text-[13px] font-medium text-gray-600">Liters *</span>
-          <input name="liters" type="number" step="any" min="0.01" required className={`${inputClass} w-24`} />
+          <input name="liters" type="number" step="any" min="0.01" required className={`${filterInputClass} w-24`} />
         </label>
         <label className="block">
           <span className="mb-1 block text-[13px] font-medium text-gray-600">Cost (₹) *</span>
-          <input name="cost" type="number" step="any" min="0.01" required className={`${inputClass} w-28`} />
+          <input name="cost" type="number" step="any" min="0.01" required className={`${filterInputClass} w-28`} />
         </label>
         <label className="block">
           <span className="mb-1 block text-[13px] font-medium text-gray-600">Note</span>
-          <input name="note" className={`${inputClass} w-48`} placeholder="Optional" />
+          <input name="note" className={`${filterInputClass} w-48`} placeholder="Optional" />
         </label>
         <SubmitButton>Add Fuel Log</SubmitButton>
       </div>
