@@ -16,6 +16,7 @@ model User {
   passwordHash String
   name         String
   role         String // FLEET_MANAGER | DRIVER | SAFETY_OFFICER | FINANCIAL_ANALYST
+  status       String   @default("ACTIVE") // ACTIVE | INACTIVE
   createdAt    DateTime @default(now())
 }
 

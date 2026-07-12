@@ -13,11 +13,14 @@ const NAV_ITEMS = [
   { href: "/reports", label: "Reports" },
   { href: "/import", label: "Import", requiresImport: true },
   { href: "/sync", label: "Sheet Bridge", requiresImport: true },
+  { href: "/admin/users", label: "Users", requiresAdmin: true },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: React.ReactNode }) {
   const visibleNavItems = NAV_ITEMS.filter(
-    (item) => !item.requiresImport || canMutate(user.role, "import")
+    (item) =>
+      (!item.requiresImport || canMutate(user.role, "import")) &&
+      (!item.requiresAdmin || canMutate(user.role, "users"))
   );
 
   return (

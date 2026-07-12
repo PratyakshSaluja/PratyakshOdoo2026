@@ -29,7 +29,15 @@ export const EXPENSE_CATEGORIES = ["TOLL", "PARKING", "REPAIR", "OTHER"] as cons
 
 export const REGIONS = ["North", "South", "East", "West"] as const;
 
-export type MutationArea = "vehicles" | "drivers" | "trips" | "maintenance" | "expenses" | "import" | "sync";
+export type MutationArea =
+  | "vehicles"
+  | "drivers"
+  | "trips"
+  | "maintenance"
+  | "expenses"
+  | "import"
+  | "sync"
+  | "users";
 
 /**
  * UX-honesty gate mirroring the server-side `assertRole` checks — the

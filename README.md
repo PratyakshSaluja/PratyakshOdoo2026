@@ -35,6 +35,10 @@ Role-based access control: every mutation is guarded server-side (see `lib/sessi
 |---|---|
 | ![Reports](docs/screenshots/reports.png) | ![Sheet Bridge](docs/screenshots/sheet-bridge.png) |
 
+| User administration (Fleet Manager only) |
+|---|
+| ![User Admin](docs/screenshots/admin-users.png) |
+
 ## Stack
 
 - **Next.js (App Router) + TypeScript** — server components + server actions, no client-side API juggling
@@ -43,6 +47,21 @@ Role-based access control: every mutation is guarded server-side (see `lib/sessi
 - **Tailwind CSS** — UI styled after the Odoo backend (plum navbar, list/form views, chevron status pipeline)
 
 Architecture: pages and server actions never contain business logic — they parse input (Zod), check the session role, and call a **service layer** (`lib/services/`). All status transitions run inside Prisma transactions so a vehicle, its driver, and the trip can never disagree.
+
+## Deployment
+
+Set environment variables from `.env.example` on the host — most importantly **`SESSION_SECRET`** (a random 32+ char string; the app refuses to boot in production without it). Sessions use `secure` cookies automatically when `NODE_ENV=production`, so serve over HTTPS.
+
+```bash
+npm install
+npm run setup     # prisma db push + seed
+npm run build
+npm start
+```
+
+The datastore is a local **SQLite file**, so deploy to a host with a **persistent filesystem** (Render, Railway, Fly, a VPS, or a container with a mounted volume) rather than an ephemeral serverless runtime. To move to Postgres, change the `datasource` provider in `prisma/schema.prisma` and set `DATABASE_URL` — no application code changes are required (all access goes through the service layer).
+
+Accounts are provisioned by the Fleet Manager in-app (Users screen); after first deploy, log in with the seeded `fleet@transitops.in` account and create the rest.
 
 ## Mandatory business rules — where each is enforced
 
@@ -82,11 +101,12 @@ The seed data already contains every state (an active dispatched trip, an expire
 - **Maintenance** — open/close logs with automatic vehicle status flips.
 - **Fuel & Expenses** — fuel logs and other expenses per vehicle, with automatic operational-cost rollups (Fuel + Maintenance).
 - **Reports & Analytics** — fuel efficiency (km/L), fleet utilization, operational cost and vehicle ROI `((Revenue − (Maintenance + Fuel)) / Acquisition Cost)`, CSV export, and cost/efficiency charts.
+- **User Administration** (Fleet Manager only) — provision accounts, assign/change roles, and deactivate users. Signup is closed and roles are never self-assigned; the app is protected from lockout (you can't deactivate yourself or demote/deactivate the last active Fleet Manager). Deactivated users cannot log in.
 - **Spreadsheet Import** — the migration path for teams still on Excel: upload an existing vehicle/driver logbook as CSV; every row passes through the same validation and duplicate rules as the forms, with a per-row created/skipped report. Sample files included.
 - **Ops Sheet Bridge** — two-way Google Sheets sync for teams that won't leave their sheet. One click pulls sheet edits into the app *through the same validation and business rules as the forms* (a new sheet row becomes a validated vehicle, duplicates are skipped with a reason), then pushes the authoritative fleet state back, stamping IDs onto new rows. Pull-then-push in a single pass means no echo loops; Odometer and Status stay app-owned. Config is optional and env-based (`GOOGLE_OAUTH_CLIENT_PATH`, `GOOGLE_SHEETS_TOKEN_PATH`, `SYNC_SPREADSHEET_ID` in `.env.local` — an OAuth client + token JSON with the `spreadsheets` scope); without it the rest of the app is fully functional and the `/sync` page explains the feature.
 
 ## Notes
 
 - Trip revenue is captured per trip to power the ROI report.
-- Signup is intentionally closed: accounts are provisioned (seeded) and roles are never self-assigned.
+- Signup is intentionally closed: accounts are provisioned by the Fleet Manager (Users screen) and roles are never self-assigned.
 - `npm run seed` is idempotent — it resets to a clean demo state.

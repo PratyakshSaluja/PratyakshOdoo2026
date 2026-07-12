@@ -5,6 +5,14 @@ import type { Role } from "./domain";
 import { RuleViolationError } from "./errors";
 
 const COOKIE_NAME = "transitops_session";
+const isProduction = process.env.NODE_ENV === "production";
+
+// In production a real SESSION_SECRET is mandatory — fail fast rather than
+// signing sessions with a known dev key. Locally a stable fallback keeps the
+// zero-config `npm run dev` experience.
+if (isProduction && !process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET must be set in production.");
+}
 const secret = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? "transitops-hackathon-dev-secret"
 );
@@ -26,6 +34,7 @@ export async function createSession(user: SessionUser): Promise<void> {
   (await cookies()).set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
+    secure: isProduction, // HTTPS-only once deployed; plain http for local dev
     path: "/",
   });
 }

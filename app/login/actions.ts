@@ -20,6 +20,10 @@ async function authenticate(email: string, password: string): Promise<ActionResu
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return { ok: false, error: "Invalid email or password." };
 
+  if (user.status === "INACTIVE") {
+    return { ok: false, error: "This account has been deactivated. Contact your Fleet Manager." };
+  }
+
   await createSession({
     id: user.id,
     name: user.name,
