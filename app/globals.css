@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Odoo backend palette */
+@theme {
+  --color-odoo: #714b67;
+  --color-odoo-dark: #5a3d52;
+  --color-odoo-teal: #017e84;
+  --color-canvas: #f4f4f4;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: #374151;
+}
+
+/* Odoo-style chevron statusbar stages */
+.stage {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+}
+.stage:first-child {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+}
