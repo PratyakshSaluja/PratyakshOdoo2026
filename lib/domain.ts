@@ -29,6 +29,28 @@ export const EXPENSE_CATEGORIES = ["TOLL", "PARKING", "REPAIR", "OTHER"] as cons
 
 export const REGIONS = ["North", "South", "East", "West"] as const;
 
+export type MutationArea = "vehicles" | "drivers" | "trips" | "maintenance" | "expenses" | "import" | "sync";
+
+/**
+ * UX-honesty gate mirroring the server-side `assertRole` checks — the
+ * server actions are the real enforcement, this only decides whether to
+ * render the mutation controls at all. Fleet Manager can do everything;
+ * other roles are scoped to their own area.
+ */
+export function canMutate(role: Role, area: MutationArea): boolean {
+  if (role === "FLEET_MANAGER") return true;
+  switch (area) {
+    case "trips":
+      return role === "DRIVER";
+    case "drivers":
+      return role === "SAFETY_OFFICER";
+    case "expenses":
+      return role === "FINANCIAL_ANALYST";
+    default:
+      return false;
+  }
+}
+
 export function titleCase(value: string): string {
   return value
     .toLowerCase()

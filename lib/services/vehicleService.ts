@@ -85,3 +85,25 @@ export async function setVehicleRetired(id: string, retired: boolean) {
     throw new RuleViolationError("Only retired vehicles can be reactivated.");
   return prisma.vehicle.update({ where: { id }, data: { status: "AVAILABLE" } });
 }
+
+/** Guarded hard delete — only for vehicles with no operational history. */
+export async function deleteVehicle(id: string) {
+  const vehicle = await prisma.vehicle.findUnique({
+    where: { id },
+    include: {
+      _count: { select: { trips: true, maintenance: true, fuelLogs: true, expenses: true } },
+    },
+  });
+  if (!vehicle) throw new RuleViolationError("Vehicle not found.");
+
+  if (vehicle.status === "ON_TRIP")
+    throw new RuleViolationError("Cannot delete a vehicle that is currently on a trip.");
+
+  const { trips, maintenance, fuelLogs, expenses } = vehicle._count;
+  if (trips > 0 || maintenance > 0 || fuelLogs > 0 || expenses > 0)
+    throw new RuleViolationError(
+      "This vehicle has operational history — retire it instead of deleting."
+    );
+
+  return prisma.vehicle.delete({ where: { id } });
+}

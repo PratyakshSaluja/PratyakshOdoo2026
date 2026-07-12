@@ -1,7 +1,7 @@
 import { listVehicles } from "@/lib/services/vehicleService";
 import { listExpenses, listFuelLogs, vehicleCostSummaries } from "@/lib/services/expenseService";
 import { requireUser } from "@/lib/session";
-import { titleCase } from "@/lib/domain";
+import { canMutate, titleCase } from "@/lib/domain";
 import { formatDate, formatINR, formatNumber } from "@/lib/format";
 import { ControlPanel, EmptyRow, ListView, Td, Th } from "@/components/ui";
 import { addExpenseAction, addFuelLogAction } from "./actions";
@@ -9,7 +9,8 @@ import { FuelLogForm } from "./FuelLogForm";
 import { ExpenseForm } from "./ExpenseForm";
 
 export default async function ExpensesPage() {
-  await requireUser();
+  const user = await requireUser();
+  const mayMutate = canMutate(user.role, "expenses");
   const [vehicles, summaries, fuelLogs, expenses] = await Promise.all([
     listVehicles(),
     vehicleCostSummaries(),
@@ -64,9 +65,11 @@ export default async function ExpensesPage() {
       <div className="mx-auto max-w-5xl px-4">
         <h2 className="mt-6 px-2 text-sm font-semibold text-gray-600">Fuel Logs</h2>
       </div>
-      <div className="mx-auto max-w-5xl px-4">
-        <FuelLogForm action={addFuelLogAction} vehicles={vehicleOptions} />
-      </div>
+      {mayMutate && (
+        <div className="mx-auto max-w-5xl px-4">
+          <FuelLogForm action={addFuelLogAction} vehicles={vehicleOptions} />
+        </div>
+      )}
       <div className="mx-auto max-w-5xl">
         <ListView>
           <thead>
@@ -98,9 +101,11 @@ export default async function ExpensesPage() {
       <div className="mx-auto max-w-5xl px-4">
         <h2 className="mt-6 px-2 text-sm font-semibold text-gray-600">Other Expenses</h2>
       </div>
-      <div className="mx-auto max-w-5xl px-4">
-        <ExpenseForm action={addExpenseAction} vehicles={vehicleOptions} />
-      </div>
+      {mayMutate && (
+        <div className="mx-auto max-w-5xl px-4">
+          <ExpenseForm action={addExpenseAction} vehicles={vehicleOptions} />
+        </div>
+      )}
       <div className="mx-auto max-w-5xl pb-8">
         <ListView>
           <thead>

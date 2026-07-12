@@ -13,6 +13,19 @@ body {
   color: #374151;
 }
 
+/* Print / save-as-PDF: hide chrome, keep the report */
+@media print {
+  header,
+  form,
+  button,
+  a[href="/reports/export"] {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
+
 /* Odoo-style chevron statusbar stages */
 .stage {
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);

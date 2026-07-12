@@ -1,12 +1,19 @@
 import { requireUser } from "@/lib/session";
-import { vehicleReport } from "@/lib/services/reportService";
+import { dashboardKpis, vehicleReport } from "@/lib/services/reportService";
 import { titleCase } from "@/lib/domain";
 import { formatINR, formatNumber } from "@/lib/format";
-import { ControlPanel, EmptyRow, ListView, StatusBadge, Td, Th } from "@/components/ui";
+import { ControlPanel, EmptyRow, KpiCard, ListView, StatusBadge, Td, Th } from "@/components/ui";
+import { PrintButton } from "@/components/PrintButton";
 
 export default async function ReportsPage() {
   await requireUser();
-  const rows = await vehicleReport();
+  const [rows, kpis] = await Promise.all([vehicleReport(), dashboardKpis()]);
+
+  const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+  const totalOpCost = rows.reduce((s, r) => s + r.operationalCost, 0);
+  const totalDistance = rows.reduce((s, r) => s + r.distanceKm, 0);
+  const totalFuel = rows.reduce((s, r) => s + r.fuelLiters, 0);
+  const fleetEfficiency = totalFuel > 0 ? Math.round((totalDistance / totalFuel) * 10) / 10 : null;
 
   const maxOperationalCost = Math.max(0, ...rows.map((r) => r.operationalCost));
   const maxFuelEfficiency = Math.max(0, ...rows.map((r) => r.fuelEfficiencyKmPerL ?? 0));
@@ -16,14 +23,33 @@ export default async function ReportsPage() {
       <ControlPanel
         title="Reports & Analytics"
         right={
-          <a
-            href="/reports/export"
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Export CSV
-          </a>
+          <>
+            <PrintButton />
+            <a
+              href="/reports/export"
+              className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Export CSV
+            </a>
+          </>
         }
       />
+
+      <div className="grid grid-cols-2 gap-4 p-4 sm:p-6 md:grid-cols-4">
+        <KpiCard
+          label="Fleet Utilization"
+          value={`${kpis.utilizationPct}%`}
+          sub="On Trip / active fleet"
+          accent="plum"
+        />
+        <KpiCard label="Total Revenue" value={formatINR(totalRevenue)} sub="Completed trips" accent="green" />
+        <KpiCard label="Operational Cost" value={formatINR(totalOpCost)} sub="Fuel + maintenance" accent="amber" />
+        <KpiCard
+          label="Fleet Fuel Efficiency"
+          value={fleetEfficiency !== null ? `${fleetEfficiency} km/L` : "—"}
+          sub="Distance / fuel, all vehicles"
+        />
+      </div>
 
       <ListView>
         <thead>

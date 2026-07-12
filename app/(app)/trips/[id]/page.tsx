@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTrip } from "@/lib/services/tripService";
 import { requireUser } from "@/lib/session";
+import { canMutate } from "@/lib/domain";
 import { formatDateTime, formatINR, formatNumber } from "@/lib/format";
 import { ControlPanel, FieldGrid, FormSheet } from "@/components/ui";
 import { StatusBar } from "@/components/StatusBar";
@@ -18,7 +19,7 @@ function DetailField({ label, children }: { label: string; children: React.React
 }
 
 export default async function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const trip = await getTrip(id);
   if (!trip) notFound();
@@ -64,12 +65,14 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
         </FieldGrid>
       </FormSheet>
 
-      <TripActions
-        status={trip.status}
-        dispatchAction={dispatchAction}
-        completeAction={completeAction}
-        cancelAction={cancelAction}
-      />
+      {canMutate(user.role, "trips") && (
+        <TripActions
+          status={trip.status}
+          dispatchAction={dispatchAction}
+          completeAction={completeAction}
+          cancelAction={cancelAction}
+        />
+      )}
     </>
   );
 }

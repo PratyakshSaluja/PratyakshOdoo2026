@@ -63,7 +63,7 @@ export function VehicleForm({
             name="maxLoadKg"
             type="number"
             step="any"
-            min="1"
+            min="0.01"
             required
             defaultValue={defaults.maxLoadKg}
             className={inputClass}
@@ -85,7 +85,7 @@ export function VehicleForm({
             name="acquisitionCost"
             type="number"
             step="any"
-            min="1"
+            min="0.01"
             required
             defaultValue={defaults.acquisitionCost}
             className={inputClass}

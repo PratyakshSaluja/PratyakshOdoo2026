@@ -61,10 +61,10 @@ export function TripForm({
           </p>
         </Field>
         <Field label="Cargo Weight (kg) *">
-          <input name="cargoWeightKg" type="number" step="any" min="1" required className={inputClass} />
+          <input name="cargoWeightKg" type="number" step="any" min="0.01" required className={inputClass} />
         </Field>
         <Field label="Planned Distance (km) *">
-          <input name="plannedDistanceKm" type="number" step="any" min="1" required className={inputClass} />
+          <input name="plannedDistanceKm" type="number" step="any" min="0.01" required className={inputClass} />
         </Field>
         <Field label="Revenue (₹) *">
           <input name="revenue" type="number" step="any" min="0" required className={inputClass} />

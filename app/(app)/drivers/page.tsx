@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { listDrivers } from "@/lib/services/driverService";
 import { requireUser } from "@/lib/session";
-import { DRIVER_STATUSES, titleCase } from "@/lib/domain";
+import { DRIVER_STATUSES, canMutate, titleCase } from "@/lib/domain";
 import { formatDate, isLicenseExpired, daysUntil } from "@/lib/format";
 import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 
@@ -10,7 +10,7 @@ export default async function DriversPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const filters = await searchParams;
   const drivers = await listDrivers(filters);
 
@@ -18,7 +18,7 @@ export default async function DriversPage({
     <>
       <ControlPanel
         title="Drivers"
-        actions={<PrimaryLink href="/drivers/new">New</PrimaryLink>}
+        actions={canMutate(user.role, "drivers") ? <PrimaryLink href="/drivers/new">New</PrimaryLink> : undefined}
         right={
           <form className="flex flex-wrap items-center gap-2" method="get">
             <input
@@ -76,7 +76,7 @@ export default async function DriversPage({
                       </span>
                     ) : remaining <= 30 ? (
                       <span className="inline-block whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
-                        Expires in {remaining}d
+                        {remaining === 0 ? "Expires today" : `Expires in ${remaining}d`}
                       </span>
                     ) : null}
                   </span>

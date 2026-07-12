@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listMaintenance } from "@/lib/services/maintenanceService";
 import { requireUser } from "@/lib/session";
-import { titleCase } from "@/lib/domain";
+import { canMutate, titleCase } from "@/lib/domain";
 import { formatDate, formatINR } from "@/lib/format";
 import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 import { closeMaintenanceAction } from "./actions";
@@ -14,15 +14,16 @@ export default async function MaintenancePage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const filters = await searchParams;
   const logs = await listMaintenance(filters);
+  const mayMutate = canMutate(user.role, "maintenance");
 
   return (
     <>
       <ControlPanel
         title="Maintenance"
-        actions={<PrimaryLink href="/maintenance/new">New</PrimaryLink>}
+        actions={mayMutate ? <PrimaryLink href="/maintenance/new">New</PrimaryLink> : undefined}
         right={
           <form className="flex items-center gap-2" method="get">
             <select name="status" defaultValue={filters.status ?? ""} className={`${filterInputClass} w-32`}>
@@ -81,7 +82,10 @@ export default async function MaintenancePage({
               <Td>
                 <StatusBadge status={m.status} />
               </Td>
-              <Td>{m.status === "OPEN" && <CloseForm action={closeMaintenanceAction.bind(null, m.id)} />}</Td>
+              <Td>
+                {m.status === "OPEN" &&
+                  (mayMutate ? <CloseForm action={closeMaintenanceAction.bind(null, m.id)} /> : "—")}
+              </Td>
             </tr>
           ))}
         </tbody>

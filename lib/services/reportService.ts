@@ -9,12 +9,19 @@ export async function dashboardKpis(filters: DashboardFilters = {}) {
     ...(filters.region ? { region: filters.region } : {}),
   };
 
+  // Trip/maintenance KPIs are scoped through their vehicle (drivers have no
+  // type/region, so Drivers On Duty stays fleet-wide).
+  const tripVehicleScope = {
+    ...(filters.type ? { type: filters.type } : {}),
+    ...(filters.region ? { region: filters.region } : {}),
+  };
+
   const [vehicles, activeTrips, pendingTrips, driversOnDuty, openMaintenance] = await Promise.all([
     prisma.vehicle.findMany({ where: vehicleWhere, select: { status: true } }),
-    prisma.trip.count({ where: { status: "DISPATCHED" } }),
-    prisma.trip.count({ where: { status: "DRAFT" } }),
+    prisma.trip.count({ where: { status: "DISPATCHED", vehicle: tripVehicleScope } }),
+    prisma.trip.count({ where: { status: "DRAFT", vehicle: tripVehicleScope } }),
     prisma.driver.count({ where: { status: { in: ["AVAILABLE", "ON_TRIP"] } } }),
-    prisma.maintenanceLog.count({ where: { status: "OPEN" } }),
+    prisma.maintenanceLog.count({ where: { status: "OPEN", vehicle: tripVehicleScope } }),
   ]);
 
   const activeFleet = vehicles.filter((v) => v.status !== "RETIRED");

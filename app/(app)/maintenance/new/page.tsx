@@ -9,7 +9,7 @@ export default async function NewMaintenancePage() {
   const vehicles = await maintainableVehicles();
   const options = vehicles.map((v) => ({
     id: v.id,
-    label: `${v.name} (${v.regNumber}) — ${v.status}`,
+    label: `${v.name} (${v.regNumber})`,
   }));
 
   return (

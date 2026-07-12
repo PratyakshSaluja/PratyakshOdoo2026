@@ -2,26 +2,48 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDriver } from "@/lib/services/driverService";
 import { requireUser } from "@/lib/session";
+import { canMutate } from "@/lib/domain";
 import { formatINR, formatNumber } from "@/lib/format";
-import { ControlPanel, EmptyRow, FormSheet, ListView, SecondaryButton, StatusBadge, Td, Th } from "@/components/ui";
-import { SubmitButton } from "@/components/SubmitButton";
+import { ControlPanel, EmptyRow, FormSheet, ListView, StatusBadge, Td, Th } from "@/components/ui";
 import { DriverForm } from "@/components/DriverForm";
-import { setDriverStatusAction, updateDriverAction } from "../actions";
+import { StatusActionButtons, type StatusAction } from "@/components/StatusActionButtons";
+import { deleteDriverAction, setDriverStatusAction, updateDriverAction } from "../actions";
 
 export default async function DriverDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const driver = await getDriver(id);
   if (!driver) notFound();
 
   const updateWithId = updateDriverAction.bind(null, driver.id);
-  // Bound status actions take no FormData — cast to the <form action> shape
-  // React expects (mirrors the same pattern/limitation as setVehicleRetiredAction
-  // in the vehicles exemplar).
-  type FormAction = (formData: FormData) => void | Promise<void>;
-  const setAvailable = setDriverStatusAction.bind(null, driver.id, "AVAILABLE") as unknown as FormAction;
-  const setOffDuty = setDriverStatusAction.bind(null, driver.id, "OFF_DUTY") as unknown as FormAction;
-  const setSuspended = setDriverStatusAction.bind(null, driver.id, "SUSPENDED") as unknown as FormAction;
+  const deleteAction: StatusAction = {
+    label: "Delete",
+    variant: "danger",
+    action: deleteDriverAction.bind(null, driver.id),
+  };
+
+  let statusActions: StatusAction[] | null = null;
+  if (canMutate(user.role, "drivers")) {
+    if (driver.status === "AVAILABLE") {
+      statusActions = [
+        { label: "Set Off Duty", variant: "secondary", action: setDriverStatusAction.bind(null, driver.id, "OFF_DUTY") },
+        { label: "Suspend", variant: "danger", action: setDriverStatusAction.bind(null, driver.id, "SUSPENDED") },
+        deleteAction,
+      ];
+    } else if (driver.status === "OFF_DUTY") {
+      statusActions = [
+        { label: "Set Available", variant: "secondary", action: setDriverStatusAction.bind(null, driver.id, "AVAILABLE") },
+        { label: "Suspend", variant: "danger", action: setDriverStatusAction.bind(null, driver.id, "SUSPENDED") },
+        deleteAction,
+      ];
+    } else if (driver.status === "SUSPENDED") {
+      statusActions = [
+        { label: "Reinstate", variant: "secondary", action: setDriverStatusAction.bind(null, driver.id, "AVAILABLE") },
+        deleteAction,
+      ];
+    }
+    // ON_TRIP: no status actions — driver must complete/cancel the trip first.
+  }
 
   return (
     <>
@@ -30,31 +52,11 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
         breadcrumb={{ href: "/drivers", label: "Drivers" }}
         actions={<StatusBadge status={driver.status} />}
         right={
-          driver.status === "AVAILABLE" ? (
-            <>
-              <form action={setOffDuty}>
-                <SecondaryButton type="submit">Set Off Duty</SecondaryButton>
-              </form>
-              <form action={setSuspended}>
-                <SubmitButton variant="danger">Suspend</SubmitButton>
-              </form>
-            </>
-          ) : driver.status === "OFF_DUTY" ? (
-            <>
-              <form action={setAvailable}>
-                <SecondaryButton type="submit">Set Available</SecondaryButton>
-              </form>
-              <form action={setSuspended}>
-                <SubmitButton variant="danger">Suspend</SubmitButton>
-              </form>
-            </>
-          ) : driver.status === "SUSPENDED" ? (
-            <form action={setAvailable}>
-              <SecondaryButton type="submit">Reinstate</SecondaryButton>
-            </form>
-          ) : (
+          statusActions ? (
+            <StatusActionButtons actions={statusActions} />
+          ) : driver.status === "ON_TRIP" ? (
             <span className="text-sm text-gray-500">On active trip</span>
-          )
+          ) : undefined
         }
       />
 

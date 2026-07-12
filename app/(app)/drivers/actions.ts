@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RuleViolationError, toActionResult, type ActionResult } from "@/lib/errors";
 import { assertRole, requireUser } from "@/lib/session";
-import { createDriver, driverInput, setDriverStatus, updateDriver } from "@/lib/services/driverService";
+import {
+  createDriver,
+  deleteDriver,
+  driverInput,
+  setDriverStatus,
+  updateDriver,
+} from "@/lib/services/driverService";
 
 export async function createDriverAction(
   _prev: ActionResult | null,
@@ -42,7 +48,9 @@ export async function updateDriverAction(
 
 export async function setDriverStatusAction(
   id: string,
-  status: "AVAILABLE" | "OFF_DUTY" | "SUSPENDED"
+  status: "AVAILABLE" | "OFF_DUTY" | "SUSPENDED",
+  _prev: ActionResult | null,
+  _formData: FormData
 ): Promise<ActionResult> {
   const user = await requireUser();
   const result = await toActionResult(async () => {
@@ -51,5 +59,20 @@ export async function setDriverStatusAction(
     revalidatePath("/drivers");
     revalidatePath(`/drivers/${id}`);
   });
+  return result;
+}
+
+export async function deleteDriverAction(
+  id: string,
+  _prev: ActionResult | null,
+  _formData: FormData
+): Promise<ActionResult> {
+  const user = await requireUser();
+  const result = await toActionResult(async () => {
+    assertRole(user, "SAFETY_OFFICER");
+    await deleteDriver(id);
+    revalidatePath("/drivers");
+  });
+  if (result.ok) redirect("/drivers");
   return result;
 }

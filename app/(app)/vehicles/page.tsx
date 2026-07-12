@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { listVehicles } from "@/lib/services/vehicleService";
 import { requireUser } from "@/lib/session";
-import { REGIONS, VEHICLE_STATUSES, VEHICLE_TYPES, titleCase } from "@/lib/domain";
+import { REGIONS, VEHICLE_STATUSES, VEHICLE_TYPES, canMutate, titleCase } from "@/lib/domain";
 import { formatINR, formatNumber } from "@/lib/format";
 import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th, inputClass, filterInputClass } from "@/components/ui";
 
@@ -10,7 +10,7 @@ export default async function VehiclesPage({
 }: {
   searchParams: Promise<{ type?: string; status?: string; region?: string; q?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const filters = await searchParams;
   const vehicles = await listVehicles(filters);
 
@@ -18,7 +18,7 @@ export default async function VehiclesPage({
     <>
       <ControlPanel
         title="Vehicles"
-        actions={<PrimaryLink href="/vehicles/new">New</PrimaryLink>}
+        actions={canMutate(user.role, "vehicles") ? <PrimaryLink href="/vehicles/new">New</PrimaryLink> : undefined}
         right={
           <form className="flex flex-wrap items-center gap-2" method="get">
             <input

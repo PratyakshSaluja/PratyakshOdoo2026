@@ -33,11 +33,18 @@ export function formatDateTime(value: Date | string | null | undefined): string 
   });
 }
 
-export function isLicenseExpired(expiry: Date | string): boolean {
-  return new Date(expiry).getTime() < Date.now();
+function startOfDay(value: Date | string): number {
+  const d = new Date(value);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
 
-/** Days until expiry — negative when already expired. */
+/** Date-only comparison: a license expiring today is still valid today. */
+export function isLicenseExpired(expiry: Date | string): boolean {
+  return startOfDay(expiry) < startOfDay(new Date());
+}
+
+/** Whole days until expiry (date-only) — 0 = expires today, negative = expired. */
 export function daysUntil(date: Date | string): number {
-  return Math.ceil((new Date(date).getTime() - Date.now()) / 86_400_000);
+  return Math.round((startOfDay(date) - startOfDay(new Date())) / 86_400_000);
 }

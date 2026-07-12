@@ -2,21 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getVehicle } from "@/lib/services/vehicleService";
 import { requireUser } from "@/lib/session";
-import { titleCase } from "@/lib/domain";
+import { canMutate, titleCase } from "@/lib/domain";
 import { formatDate, formatINR, formatNumber } from "@/lib/format";
-import { ControlPanel, EmptyRow, FormSheet, ListView, SecondaryButton, StatusBadge, Td, Th } from "@/components/ui";
+import { ControlPanel, EmptyRow, FormSheet, ListView, StatusBadge, Td, Th } from "@/components/ui";
 import { VehicleForm } from "@/components/VehicleForm";
-import { setVehicleRetiredFormAction, updateVehicleAction } from "../actions";
+import { StatusActionButtons } from "@/components/StatusActionButtons";
+import { deleteVehicleAction, setVehicleRetiredAction, updateVehicleAction } from "../actions";
 
 export default async function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const vehicle = await getVehicle(id);
   if (!vehicle) notFound();
 
   const updateWithId = updateVehicleAction.bind(null, vehicle.id);
-  const retire = setVehicleRetiredFormAction.bind(null, vehicle.id, true);
-  const reactivate = setVehicleRetiredFormAction.bind(null, vehicle.id, false);
 
   return (
     <>
@@ -25,15 +24,24 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
         breadcrumb={{ href: "/vehicles", label: "Vehicles" }}
         actions={<StatusBadge status={vehicle.status} />}
         right={
-          vehicle.status === "RETIRED" ? (
-            <form action={reactivate.bind(null)}>
-              <SecondaryButton type="submit">Reactivate</SecondaryButton>
-            </form>
-          ) : (
-            <form action={retire.bind(null)}>
-              <SecondaryButton type="submit">Retire Vehicle</SecondaryButton>
-            </form>
-          )
+          canMutate(user.role, "vehicles") ? (
+            <StatusActionButtons
+              actions={[
+                vehicle.status === "RETIRED"
+                  ? {
+                      label: "Reactivate",
+                      variant: "secondary",
+                      action: setVehicleRetiredAction.bind(null, vehicle.id, false),
+                    }
+                  : {
+                      label: "Retire Vehicle",
+                      variant: "danger",
+                      action: setVehicleRetiredAction.bind(null, vehicle.id, true),
+                    },
+                { label: "Delete", variant: "danger", action: deleteVehicleAction.bind(null, vehicle.id) },
+              ]}
+            />
+          ) : undefined
         }
       />
 

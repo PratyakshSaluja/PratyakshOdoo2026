@@ -28,10 +28,17 @@ export function dispatchableVehicles() {
   return prisma.vehicle.findMany({ where: { status: "AVAILABLE" }, orderBy: { name: "asc" } });
 }
 
+/** Date-only "today" — a license expiring today is still valid for today's trips. */
+function startOfToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 /** Rule 3: expired-license or suspended (or otherwise unavailable) drivers are not assignable. */
 export function assignableDrivers() {
   return prisma.driver.findMany({
-    where: { status: "AVAILABLE", licenseExpiry: { gte: new Date() } },
+    where: { status: "AVAILABLE", licenseExpiry: { gte: startOfToday() } },
     orderBy: { name: "asc" },
   });
 }
@@ -73,7 +80,7 @@ async function validateAssignment(tx: Tx, vehicleId: string, driverId: string, c
     throw new RuleViolationError(`${driver.name} is suspended and cannot be assigned.`); // rule 3
   if (driver.status === "OFF_DUTY")
     throw new RuleViolationError(`${driver.name} is off duty.`);
-  if (driver.licenseExpiry < new Date())
+  if (driver.licenseExpiry < startOfToday())
     throw new RuleViolationError(
       `${driver.name}'s license expired on ${driver.licenseExpiry.toLocaleDateString("en-IN")}.`
     ); // rule 3

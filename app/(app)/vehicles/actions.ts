@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RuleViolationError, toActionResult, type ActionResult } from "@/lib/errors";
 import { assertRole, requireUser } from "@/lib/session";
-import { createVehicle, setVehicleRetired, updateVehicle, vehicleInput } from "@/lib/services/vehicleService";
+import {
+  createVehicle,
+  deleteVehicle,
+  setVehicleRetired,
+  updateVehicle,
+  vehicleInput,
+} from "@/lib/services/vehicleService";
 
 export async function createVehicleAction(
   _prev: ActionResult | null,
@@ -40,7 +46,12 @@ export async function updateVehicleAction(
   return result;
 }
 
-export async function setVehicleRetiredAction(id: string, retired: boolean): Promise<ActionResult> {
+export async function setVehicleRetiredAction(
+  id: string,
+  retired: boolean,
+  _prev: ActionResult | null,
+  _formData: FormData
+): Promise<ActionResult> {
   const user = await requireUser();
   const result = await toActionResult(async () => {
     assertRole(user, "FLEET_MANAGER");
@@ -51,7 +62,17 @@ export async function setVehicleRetiredAction(id: string, retired: boolean): Pro
   return result;
 }
 
-/** Form-compatible wrapper (forms expect a void action). */
-export async function setVehicleRetiredFormAction(id: string, retired: boolean): Promise<void> {
-  await setVehicleRetiredAction(id, retired);
+export async function deleteVehicleAction(
+  id: string,
+  _prev: ActionResult | null,
+  _formData: FormData
+): Promise<ActionResult> {
+  const user = await requireUser();
+  const result = await toActionResult(async () => {
+    assertRole(user, "FLEET_MANAGER");
+    await deleteVehicle(id);
+    revalidatePath("/vehicles");
+  });
+  if (result.ok) redirect("/vehicles");
+  return result;
 }

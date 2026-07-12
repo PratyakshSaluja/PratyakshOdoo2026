@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listTrips } from "@/lib/services/tripService";
 import { requireUser } from "@/lib/session";
-import { TRIP_STATUSES, titleCase } from "@/lib/domain";
+import { TRIP_STATUSES, canMutate, titleCase } from "@/lib/domain";
 import { formatDate, formatINR, formatNumber } from "@/lib/format";
 import { ControlPanel, EmptyRow, ListView, PrimaryLink, StatusBadge, Td, Th } from "@/components/ui";
 
@@ -12,14 +12,17 @@ export default async function TripsPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const filters = await searchParams;
   const activeTab = filters.status ?? "All";
   const trips = await listTrips({ status: filters.status });
 
   return (
     <>
-      <ControlPanel title="Trips" actions={<PrimaryLink href="/trips/new">New</PrimaryLink>} />
+      <ControlPanel
+        title="Trips"
+        actions={canMutate(user.role, "trips") ? <PrimaryLink href="/trips/new">New</PrimaryLink> : undefined}
+      />
       <div className="flex gap-4 border-b border-gray-200 bg-white px-4 sm:px-6">
         {TABS.map((tab) => {
           const isActive = tab === activeTab;

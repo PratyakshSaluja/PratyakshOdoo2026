@@ -15,11 +15,18 @@ export default async function DashboardPage({
   await requireUser();
   const filters = await searchParams;
 
-  const [kpis, activeTrips, drivers] = await Promise.all([
+  const [kpis, allActiveTrips, drivers] = await Promise.all([
     dashboardKpis(filters),
     listTrips({ status: "DISPATCHED" }),
     listDrivers(),
   ]);
+
+  // Scope the trip feed to the same vehicle filters as the KPIs.
+  const activeTrips = allActiveTrips.filter(
+    (t) =>
+      (!filters.type || t.vehicle.type === filters.type) &&
+      (!filters.region || t.vehicle.region === filters.region)
+  );
 
   const licenseAlerts = drivers
     .map((d) => ({ ...d, daysLeft: daysUntil(d.licenseExpiry) }))
@@ -144,13 +151,13 @@ export default async function DashboardPage({
               <Td>{d.licenseNumber}</Td>
               <Td>{formatDate(d.licenseExpiry)}</Td>
               <Td>
-                {d.daysLeft <= 0 ? (
+                {d.daysLeft < 0 ? (
                   <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
                     Expired {-d.daysLeft}d ago
                   </span>
                 ) : (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                    Expires in {d.daysLeft}d
+                    {d.daysLeft === 0 ? "Expires today" : `Expires in ${d.daysLeft}d`}
                   </span>
                 )}
               </Td>

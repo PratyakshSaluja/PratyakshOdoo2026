@@ -19,10 +19,10 @@ export function listMaintenance(filters?: { status?: string }) {
   });
 }
 
-/** Vehicles eligible for a new maintenance log (not retired, not already in shop). */
+/** Vehicles eligible for a new maintenance log — only Available ones (openMaintenance rejects everything else). */
 export function maintainableVehicles() {
   return prisma.vehicle.findMany({
-    where: { status: { in: ["AVAILABLE", "ON_TRIP"] } },
+    where: { status: "AVAILABLE" },
     orderBy: { name: "asc" },
   });
 }

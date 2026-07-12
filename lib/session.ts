@@ -64,9 +64,9 @@ export async function requireUser(): Promise<SessionUser> {
 export function assertRole(user: SessionUser, ...allowed: Role[]): void {
   if (user.role === "FLEET_MANAGER") return;
   if (!allowed.includes(user.role)) {
-    throw new RuleViolationError(
-      `Your role does not permit this action (requires ${allowed.join(" or ")}).`,
-      "FORBIDDEN"
-    );
+    const requirement = allowed.length
+      ? `requires ${allowed.join(" or ")}`
+      : "restricted to the Fleet Manager";
+    throw new RuleViolationError(`Your role does not permit this action (${requirement}).`, "FORBIDDEN");
   }
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SessionUser } from "@/lib/session";
-import { ROLE_LABELS } from "@/lib/domain";
+import { ROLE_LABELS, canMutate } from "@/lib/domain";
 import { logout } from "@/app/login/actions";
 
 const NAV_ITEMS = [
@@ -11,11 +11,15 @@ const NAV_ITEMS = [
   { href: "/maintenance", label: "Maintenance" },
   { href: "/expenses", label: "Fuel & Expenses" },
   { href: "/reports", label: "Reports" },
-  { href: "/import", label: "Import" },
-  { href: "/sync", label: "Sheet Bridge" },
+  { href: "/import", label: "Import", requiresImport: true },
+  { href: "/sync", label: "Sheet Bridge", requiresImport: true },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: React.ReactNode }) {
+  const visibleNavItems = NAV_ITEMS.filter(
+    (item) => !item.requiresImport || canMutate(user.role, "import")
+  );
+
   return (
     <div className="min-h-screen">
       <header className="bg-odoo text-white">
@@ -27,7 +31,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
             TransitOps
           </Link>
           <nav className="flex items-center gap-0.5 overflow-x-auto text-[13px]">
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { RuleViolationError, toActionResult, type ActionResult } from "@/lib/errors";
 import { assertRole, requireUser } from "@/lib/session";
 import { closeMaintenance, maintenanceInput, openMaintenance } from "@/lib/services/maintenanceService";
@@ -33,7 +34,12 @@ export async function closeMaintenanceAction(
   const result = await toActionResult(async () => {
     assertRole(user);
     const rawCost = formData.get("cost");
-    const finalCost = typeof rawCost === "string" && rawCost.trim() !== "" ? Number(rawCost) : undefined;
+    let finalCost: number | undefined;
+    if (typeof rawCost === "string" && rawCost.trim() !== "") {
+      const parsed = z.coerce.number().min(0).safeParse(rawCost);
+      if (!parsed.success) throw new RuleViolationError("Enter a valid final cost (a number ≥ 0).");
+      finalCost = parsed.data;
+    }
     await closeMaintenance(id, finalCost);
     revalidatePath("/maintenance");
     revalidatePath("/vehicles");

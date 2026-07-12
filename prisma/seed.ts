@@ -50,7 +50,7 @@ async function main() {
       // Suspended — demonstrates mandatory rule: cannot be assigned to trips.
       { name: "Manoj Patel", licenseNumber: "GJ-0120170007890", licenseCategory: "LMV", licenseExpiry: daysAhead(400), phone: "9825007890", safetyScore: 55, status: "SUSPENDED" },
       { name: "Deepak Verma", licenseNumber: "MH-1220210002468", licenseCategory: "LMV", licenseExpiry: daysAhead(320), phone: "9820102468", safetyScore: 90, status: "OFF_DUTY" },
-      { name: "Arjun Nair", licenseNumber: "KA-0520190001357", licenseCategory: "MCWG", licenseExpiry: daysAhead(760), phone: "9845001357", safetyScore: 97, status: "AVAILABLE" },
+      { name: "Arjun Nair", licenseNumber: "KA-0520190001357", licenseCategory: "LMV", licenseExpiry: daysAhead(760), phone: "9845001357", safetyScore: 97, status: "AVAILABLE" },
     ].map((data) => prisma.driver.create({ data }))
   );
 

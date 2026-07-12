@@ -69,3 +69,22 @@ export async function setDriverStatus(id: string, status: "AVAILABLE" | "OFF_DUT
     );
   return prisma.driver.update({ where: { id }, data: { status } });
 }
+
+/** Guarded hard delete — only for drivers with no trip history. */
+export async function deleteDriver(id: string) {
+  const driver = await prisma.driver.findUnique({
+    where: { id },
+    include: { _count: { select: { trips: true } } },
+  });
+  if (!driver) throw new RuleViolationError("Driver not found.");
+
+  if (driver.status === "ON_TRIP")
+    throw new RuleViolationError("Cannot delete a driver who is currently on a trip.");
+
+  if (driver._count.trips > 0)
+    throw new RuleViolationError(
+      "This driver has trip history — suspend or set off duty instead."
+    );
+
+  return prisma.driver.delete({ where: { id } });
+}
